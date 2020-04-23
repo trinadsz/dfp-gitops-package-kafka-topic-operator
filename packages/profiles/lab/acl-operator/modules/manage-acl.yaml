@@ -13,6 +13,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "-9"
 
 spec:
+  project: kafka-resource-manager
    # Sync policy
   syncPolicy:
     automated:
