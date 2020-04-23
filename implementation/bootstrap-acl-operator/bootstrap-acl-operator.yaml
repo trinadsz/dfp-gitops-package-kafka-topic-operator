@@ -78,12 +78,12 @@ spec:
   version: v1beta1
   scope: Namespaced
   names:
-    kind: KafkaUser
-    listKind: KafkaUserList
-    singular: kafkauser
-    plural: kafkausers
+    kind: Acl
+    listKind: AclList
+    singular: acl
+    plural: acls
     shortNames:
-      - ku
+      - ka
     categories:
       - strimzi
   additionalPrinterColumns:
