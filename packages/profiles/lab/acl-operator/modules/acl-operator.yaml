@@ -23,7 +23,7 @@ spec:
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: confluent
+    namespace: default
 
   source:
     repoURL: https://github.com/trinadsz/dfp-gitops-package-kafka-topic-operator.git
