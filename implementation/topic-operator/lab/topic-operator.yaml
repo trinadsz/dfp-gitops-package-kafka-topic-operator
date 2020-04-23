@@ -29,7 +29,7 @@ spec:
             - name: STRIMZI_KAFKA_BOOTSTRAP_SERVERS
               value: kafka:9071
             - name: STRIMZI_ZOOKEEPER_CONNECT
-              value: zookeeper:2181/kafka-confluent
+              value: my-confluent-oss-cp-zookeeper-headless:2181
             - name: STRIMZI_ZOOKEEPER_SESSION_TIMEOUT_MS
               value: "20000"
             - name: STRIMZI_FULL_RECONCILIATION_INTERVAL_MS
