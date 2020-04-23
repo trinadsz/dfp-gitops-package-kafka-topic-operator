@@ -15,51 +15,12 @@ spec:
     metadata:
       labels:
         name: strimzi-topic-operator
-      annotations:
-        vault.hashicorp.com/agent-inject: "true"
-        vault.hashicorp.com/auth-path: "auth/k8s/confluent-kafka-lab/confluent"
-        vault.hashicorp.com/role: "confluent-lab-role"
-        vault.hashicorp.com/agent-inject-secret-credential: "kv/confluent/lab/kafka"
-        vault.hashicorp.com/agent-inject-template-credential: |
-          {{- template "credentialTemplate" "kv/confluent/lab/kafka" -}}
-          {{- template "credentialTemplate" "kv/shared/lab/kafka" -}}
-          {{- define "credentialTemplate" }}
-            {{- $components := parseJSON `["consumer","producer","broker/","users"]` }}
-            {{- $credentialDirectory := "/vault/secrets" }}
-            {{- scratch.Set "secretRoot" . }}
-            {{- range secrets (scratch.Get "secretRoot") }}
-              {{- scratch.Set "appLevel" (printf "%s/%s" (scratch.Get "secretRoot") .) }}
-              {{- range secrets (scratch.Get "appLevel") }}
-                {{- if contains . $components }}
-                  {{- scratch.Set "componentLevel" (printf "%s%s" (scratch.Get "appLevel") .) }}
-                  {{- scratch.Set "componentLevelLeaf" "true" }}
-                  {{- range secrets (scratch.Get "componentLevel") }}
-                    {{- scratch.Set "componentLevelLeaf" "false" }}
-                    {{- with secret (printf "%s%s" (scratch.Get "componentLevel") .) }}
-                      {{- range $k, $v := .Data }}
-                        {{- $k }}{{ "\t" }}{{ $v }}{{ "\n" }}
-                        {{- plugin "hc-cred-create" (printf "%s/%s" $credentialDirectory $k) ($v) }}
-                      {{- end }}
-                    {{- end }}
-                  {{- end }}
-                  {{- if eq "true" (scratch.Get "componentLevelLeaf") }}
-                    {{- with secret (scratch.Get "componentLevel") }}
-                      {{- range $k, $v := .Data }}
-                        {{- $k }}{{ "\t" }}{{ $v }}{{ "\n" }}
-                        {{- plugin "hc-cred-create" (printf "%s/%s" $credentialDirectory $k) ($v) }}
-                      {{- end }}
-                    {{- end }}
-                  {{- end }}
-                {{- end }}
-              {{- end }}
-            {{- end }}
-          {{- end -}}
+      
     spec:
       serviceAccountName: default
       containers:
         - name: strimzi-topic-operator
-          image: docker.nexus.aetnadigital.net/hccisvc/kafka-operators:0.17.1
-          #image: hccisvc/kafka-operators:0.17.1
+          image: dsouzat/operators:latest
           args:
             - /opt/strimzi/bin/topic_operator_run.sh
           env:
