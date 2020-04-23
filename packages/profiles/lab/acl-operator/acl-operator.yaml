@@ -3,7 +3,7 @@ kind: Application
 metadata:
   name: acl-operator
 
-  namespace: default
+  namespace: argocd
   annotations:
     # ArgoCD sync waves used to solve order of operations problems. Lower values sync before higher values.
     # https://argoproj.github.io/argo-cd/user-guide/sync-waves/
