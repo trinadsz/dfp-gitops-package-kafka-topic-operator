@@ -1,0 +1,113 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: strimzi-topic-operator
+  labels:
+    app: strimzi
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: strimzi-topic-operator
+  template:
+    metadata:
+      labels:
+        name: strimzi-topic-operator
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/auth-path: "auth/k8s/confluent-kafka-lab/confluent"
+        vault.hashicorp.com/role: "confluent-lab-role"
+        vault.hashicorp.com/agent-inject-secret-credential: "kv/confluent/lab/kafka"
+        vault.hashicorp.com/agent-inject-template-credential: |
+          {{- template "credentialTemplate" "kv/confluent/lab/kafka" -}}
+          {{- template "credentialTemplate" "kv/shared/lab/kafka" -}}
+          {{- define "credentialTemplate" }}
+            {{- $components := parseJSON `["consumer","producer","broker/","users"]` }}
+            {{- $credentialDirectory := "/vault/secrets" }}
+            {{- scratch.Set "secretRoot" . }}
+            {{- range secrets (scratch.Get "secretRoot") }}
+              {{- scratch.Set "appLevel" (printf "%s/%s" (scratch.Get "secretRoot") .) }}
+              {{- range secrets (scratch.Get "appLevel") }}
+                {{- if contains . $components }}
+                  {{- scratch.Set "componentLevel" (printf "%s%s" (scratch.Get "appLevel") .) }}
+                  {{- scratch.Set "componentLevelLeaf" "true" }}
+                  {{- range secrets (scratch.Get "componentLevel") }}
+                    {{- scratch.Set "componentLevelLeaf" "false" }}
+                    {{- with secret (printf "%s%s" (scratch.Get "componentLevel") .) }}
+                      {{- range $k, $v := .Data }}
+                        {{- $k }}{{ "\t" }}{{ $v }}{{ "\n" }}
+                        {{- plugin "hc-cred-create" (printf "%s/%s" $credentialDirectory $k) ($v) }}
+                      {{- end }}
+                    {{- end }}
+                  {{- end }}
+                  {{- if eq "true" (scratch.Get "componentLevelLeaf") }}
+                    {{- with secret (scratch.Get "componentLevel") }}
+                      {{- range $k, $v := .Data }}
+                        {{- $k }}{{ "\t" }}{{ $v }}{{ "\n" }}
+                        {{- plugin "hc-cred-create" (printf "%s/%s" $credentialDirectory $k) ($v) }}
+                      {{- end }}
+                    {{- end }}
+                  {{- end }}
+                {{- end }}
+              {{- end }}
+            {{- end }}
+          {{- end -}}
+    spec:
+      serviceAccountName: default
+      containers:
+        - name: strimzi-topic-operator
+          image: docker.nexus.aetnadigital.net/hccisvc/kafka-operators:0.17.1
+          #image: hccisvc/kafka-operators:0.17.1
+          args:
+            - /opt/strimzi/bin/topic_operator_run.sh
+          env:
+            - name: STRIMZI_RESOURCE_LABELS
+              value: "strimzi.io/cluster=my-cluster"
+            - name: STRIMZI_KAFKA_BOOTSTRAP_SERVERS
+              value: kafka:9071
+            - name: STRIMZI_ZOOKEEPER_CONNECT
+              value: zookeeper:2181/kafka-confluent
+            - name: STRIMZI_ZOOKEEPER_SESSION_TIMEOUT_MS
+              value: "20000"
+            - name: STRIMZI_FULL_RECONCILIATION_INTERVAL_MS
+              value: "900000"
+            - name: STRIMZI_TOPIC_METADATA_MAX_ATTEMPTS
+              value: "6"
+            - name: STRIMZI_LOG_LEVEL
+              value: INFO
+            - name: STRIMZI_TLS_ENABLED
+              value: "false"
+            - name: STRIMZI_SASL_PLAINTEXT_ENABLED
+              value: "true"
+            - name: STRIMZI_SASL_PLAINTEXT_USER
+              value: "kafka_broker_internal"
+            - name: STRIMZI_SASL_PLAINTEXT_USER_SEC
+              value: "/vault/secrets/kafka_broker_internal"
+            - name: STRIMZI_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          livenessProbe:
+            httpGet:
+              path: /healthy
+              port: 8080
+            initialDelaySeconds: 300
+            periodSeconds: 300
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+            initialDelaySeconds: 300
+            periodSeconds: 300
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: 100m
+            requests:
+              memory: 512Mi
+              cpu: 100m
+  strategy:
+    type: Recreate
+

@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: acl-operator-bootstrap-app
+  namespace: argocd
+  annotations:
+    # ArgoCD sync waves used to solve order of operations problems. Lower values sync before higher values.
+    # https://argoproj.github.io/argo-cd/acl-guide/sync-waves/
+    argocd.argoproj.io/sync-wave: "-10"
+  finalizers:  # Add a this finalizer ONLY if you want these to cascade delete.
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/aetna-digital-infrastructure/dfp-gitops-package-kafka-topic-operator.git
+    targetRevision: HEAD
+    path: implementation/bootstrap
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+
+  # Sync policy
+  syncPolicy:
+    automated:
+      prune: true # Specifies if resources should be pruned during auto-syncing ( false by default ).
+      selfHeal: false # Specifies if partial app sync should be executed when resources are changed only in target Kubernete

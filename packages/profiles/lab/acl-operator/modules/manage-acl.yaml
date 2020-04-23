@@ -1,0 +1,36 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: manage-acl
+  namespace: argocd
+
+  finalizers:  # Add a this finalizer ONLY if you want these to cascade delete.
+    - resources-finalizer.argocd.argoproj.io
+
+  # # Since this creates and edits resources dynamically
+  annotations:
+    #argocd.argoproj.io/sync-options: Validate=false
+    argocd.argoproj.io/sync-wave: "-9"
+
+spec:
+  project: kafka-resource-manager
+
+  # Sync policy
+  syncPolicy:
+    automated:
+      prune: true # Specifies if resources should be pruned during auto-syncing ( false by default ).
+      selfHeal: false # Specifies if partial app sync should be executed when resources are changed only in target Kubernetes cluster and no git change detected ( false by default ).
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: confluent
+
+  source:
+    repoURL: https://github.com/aetna-digital-infrastructure/dfp-gitops-package-kafka-topic-operator.git
+    targetRevision: feature/add_topic_and_acloperator
+    path: implementation/acl-definitions/lab
+
+      # Additional values.yaml go here. The one under the charts dir is picked by Argo by default
+      #helm:
+      #valueFiles:
+    #- implementation/xxx/values.yaml

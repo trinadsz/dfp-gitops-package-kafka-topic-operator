@@ -1,0 +1,14 @@
+apiVersion: kafka.strimzi.io/v1beta1
+kind: KafkaTopic
+metadata:
+  name: team1-app1-topic
+  labels:
+    strimzi.io/cluster: my-cluster
+spec:
+  config:
+    cleanup.policy: delete
+    confluent.key.schema.validation: "false"
+    confluent.value.schema.validation: "false"
+  partitions: 5
+  replicas: 3
+  topicName: team1-app1-topic
