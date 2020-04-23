@@ -20,6 +20,6 @@ spec:
         operation: Describe
       - resource:
           type: group
-          name: my-group
+          name: "*"
           patternType: literal
         operation: Read
