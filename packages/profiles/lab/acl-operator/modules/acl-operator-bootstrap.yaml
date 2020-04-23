@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: acl-operator-bootstrap
-  namespace: argocd
+  namespace: default
   annotations:
     # ArgoCD sync waves used to solve order of operations problems. Lower values sync before higher values.
     # https://argoproj.github.io/argo-cd/user-guide/sync-waves/
@@ -10,7 +10,7 @@ metadata:
   finalizers:  # Add a this finalizer ONLY if you want these to cascade delete.
     - resources-finalizer.argocd.argoproj.io
 spec:
-  project: kafka-resource-manager
+  
   source:
     repoURL: https://github.com/trinadsz/dfp-gitops-package-kafka-topic-operator.git
     targetRevision: master
