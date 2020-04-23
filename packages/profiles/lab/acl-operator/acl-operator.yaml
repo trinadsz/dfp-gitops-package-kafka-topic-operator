@@ -16,7 +16,7 @@ spec:
     repoURL: https://github.com/trinadsz/dfp-gitops-package-kafka-topic-operator.git
     targetRevision: master
   #  path: packages/user-operator/modules
-     path: packages/profiles/lab/acl-operator/modules
+    path: packages/profiles/lab/acl-operator/modules
   destination:
     server: https://kubernetes.default.svc
     namespace: default
