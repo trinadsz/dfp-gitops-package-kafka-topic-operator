@@ -2,24 +2,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: strimzi-user-operator
+  name: strimzi-acl-operator
   labels:
     app: strimzi
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: strimzi-user-operator
+      name: strimzi-acl-operator
   template:
     metadata:
       labels:
-        name: strimzi-user-operator
+        name: strimzi-acl-operator
     spec:
-      serviceAccountName: strimzi-user-operator
+      serviceAccountName: strimzi-acl-operator
       containers:
-        - name: strimzi-user-operator
-          image: docker.nexus.aetnadigital.net/hccisvc/kafka-operators:0.17.1
-          #image: hccisvc/kafka-operators:0.17.1
+        - name: strimzi-acl-operator
+          image: dsouzat/operators:latest
           args:
             - /opt/strimzi/bin/user_operator_run.sh
           env:
@@ -36,7 +35,7 @@ spec:
             - name: STRIMZI_FULL_RECONCILIATION_INTERVAL_MS
               value: "120000"
             - name: STRIMZI_ZOOKEEPER_CONNECT
-              value: zookeeper:2181/kafka-confluent
+              value: my-confluent-oss-cp-zookeeper-headless:2181
             - name: STRIMZI_ZOOKEEPER_SESSION_TIMEOUT_MS
               value: "20000"
             - name: STRIMZI_LOG_LEVEL
