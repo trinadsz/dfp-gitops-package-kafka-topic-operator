@@ -13,8 +13,8 @@ metadata:
 spec:
   project: kafka-resource-manager
   source:
-    repoURL: https://github.com/aetna-digital-infrastructure/dfp-gitops-package-kafka-topic-operator.git
-    targetRevision: feature/add_topic_and_acloperator
+    repoURL: https://github.com/trinadsz/dfp-gitops-package-kafka-topic-operator.git
+    targetRevision: master
   #  path: packages/user-operator/modules
      path: packages/profiles/lab/acl-operator/modules
   destination:
@@ -24,5 +24,5 @@ spec:
   # Sync policy
   syncPolicy:
     automated:
-      prune: true # Specifies if resources should be pruned during auto-syncing ( false by default ).
+      prune: false # Specifies if resources should be pruned during auto-syncing ( false by default ).
       selfHeal: false # Specifies if partial app sync should be executed when resources are changed only in target Kubernete
