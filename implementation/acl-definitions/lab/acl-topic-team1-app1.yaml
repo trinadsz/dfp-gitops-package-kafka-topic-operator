@@ -18,8 +18,3 @@ spec:
           name: my-topic
           patternType: literal
         operation: Describe
-      - resource:
-          type: group
-          name: "*"
-          patternType: literal
-        operation: Read
